@@ -1,11 +1,189 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Dufy - Music Recommender</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DUFy - Music Recommendation</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
 </head>
-<body>
-    <h1>🎵 Welcome to Dufy</h1>
-    <p>Your AI-powered music recommender system.</p>
-    <p>Try our <a href="/api/music/">Music API</a> 🚀</p>
+<body class="bg-gray-50 font-sans">
+
+  <!-- Header -->
+  <header class="flex justify-between items-center p-6 bg-white shadow">
+    <div class="text-2xl font-bold text-blue-600 flex items-center gap-2">
+      <i class="fa-solid fa-music"></i> DUFy
+    </div>
+    <nav class="space-x-6">
+      <a href="#" class="text-gray-600 hover:text-blue-600">About</a>
+      <a href="#" class="text-gray-600 hover:text-blue-600">Contact</a>
+    </nav>
+  </header>
+
+  <!-- Hero / Search Section -->
+  <section class="text-center py-16 px-6">
+    <h1 class="text-4xl font-bold mb-4">Find Your Perfect Music</h1>
+    <p class="text-gray-600 mb-6">AI-powered music suggestions for creators. Describe your vibe and discover the perfect background track.</p>
+
+    <div class="flex justify-center gap-2 mb-4">
+      <input id="searchInput" type="text" placeholder="Type your mood or scene..." class="px-4 py-2 w-2/5 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500">
+      <button onclick="searchMusic()" class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700">Find Music</button>
+    </div>
+
+    <div class="flex justify-center gap-2 flex-wrap text-sm text-gray-500">
+      Try:
+      <span class="bg-gray-200 px-3 py-1 rounded cursor-pointer hover:bg-gray-300" onclick="setSearch('happy summer vlog')">happy summer vlog</span>
+      <span class="bg-gray-200 px-3 py-1 rounded cursor-pointer hover:bg-gray-300" onclick="setSearch('aesthetic travel reel')">aesthetic travel reel</span>
+      <span class="bg-gray-200 px-3 py-1 rounded cursor-pointer hover:bg-gray-300" onclick="setSearch('gaming intense moment')">gaming intense moment</span>
+      <span class="bg-gray-200 px-3 py-1 rounded cursor-pointer hover:bg-gray-300" onclick="setSearch('calm study session')">calm study session</span>
+      <span class="bg-gray-200 px-3 py-1 rounded cursor-pointer hover:bg-gray-300" onclick="setSearch('romantic date night')">romantic date night</span>
+      <span class="bg-gray-200 px-3 py-1 rounded cursor-pointer hover:bg-gray-300" onclick="setSearch('high energy EDM')">high energy EDM</span>
+      <span class="bg-gray-200 px-3 py-1 rounded cursor-pointer hover:bg-gray-300" onclick="setSearch('piano music')">piano music</span>
+    </div>
+  </section>
+
+  <!-- AI Response Section -->
+  <section id="aiResponse" class="text-center px-6 mb-8 hidden">
+    <h2 class="text-2xl font-semibold mb-2">AI Suggestion</h2>
+    <p id="aiResponseText" class="text-gray-600 max-w-2xl mx-auto"></p>
+  </section>
+
+  <!-- Suggested Tracks -->
+  <section class="grid grid-cols-1 md:grid-cols-3 gap-6 px-6 mb-16" id="tracksContainer">
+    <!-- Tracks will be injected here dynamically -->
+  </section>
+
+  <script>
+    function renderTracks(list) {
+      const container = document.getElementById('tracksContainer');
+      container.innerHTML = "";
+      list.forEach(track => {
+        const trackHTML = `
+        <div class="bg-white p-6 rounded-lg shadow">
+          <h2 class="font-semibold text-lg mb-1">${track.music_name}</h2>
+          <p class="text-gray-500 mb-2">${track.artist_name || 'Unknown Artist'}</p>
+          <p class="text-gray-400 text-sm mb-2">${track.genre || 'Unknown Genre'}</p>
+          <div class="flex gap-1 flex-wrap mb-3">
+            ${track.overlapping_emotions ? track.overlapping_emotions.split(/,\s*|\//).map(tag => `<span class="bg-blue-100 text-blue-600 px-2 py-0.5 rounded text-xs">${tag.trim()}</span>`).join('') : ''}
+          </div>
+          <div class="flex gap-2">
+            <button onclick="copyLink('${track.music_link}')" class="flex-1 border border-gray-300 px-4 py-2 rounded hover:bg-gray-100">
+              <i class="fa-solid fa-link"></i> Copy Link
+            </button>
+            <button onclick="playTrack('${track.music_link}')" class="flex-1 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+              <i class="fa-solid fa-play"></i> Play
+            </button>
+          </div>
+        </div>
+        `;
+        container.innerHTML += trackHTML;
+      });
+    }
+
+    function copyLink(url) {
+      navigator.clipboard.writeText(url);
+      alert('Link copied!');
+    }
+
+    function playTrack(url) {
+      if (url && url !== 'No link available') {
+        window.open(url, '_blank');
+      } else {
+        alert('No link available for this track.');
+      }
+    }
+
+    function setSearch(text) {
+      document.getElementById('searchInput').value = text;
+      searchMusic();
+    }
+
+    function generateAIResponse(query) {
+      query = query.toLowerCase();
+      let response = "";
+      let matchedGenre = "";
+      let matchedTags = [];
+
+      if (query.includes("calm") || query.includes("meditative") || query.includes("study")) {
+        matchedGenre = "chill";
+        matchedTags = ["calm", "meditation"];
+        response = "For a peaceful meditative session, these soothing tracks create a serene atmosphere perfect for relaxation or focus.";
+      } else if (query.includes("happy") || query.includes("summer") || query.includes("vlog")) {
+        matchedGenre = "trending";
+        matchedTags = ["fun", "pop"];
+        response = "For a happy summer vlog, upbeat and vibrant tracks will match the lively vibe!";
+      } else if (query.includes("aesthetic") || query.includes("travel") || query.includes("reel")) {
+        matchedGenre = "cinematic";
+        matchedTags = ["epic", "dramatic"];
+        response = "For an aesthetic travel reel, cinematic tracks will elevate your visuals with a grand feel.";
+      } else if (query.includes("gaming") || query.includes("intense")) {
+        matchedGenre = "energetic";
+        matchedTags = ["energetic", "dance"];
+        response = "For intense gaming moments, high-energy tracks will keep the adrenaline pumping.";
+      } else if (query.includes("romantic") || query.includes("date")) {
+        matchedGenre = "romantic";
+        matchedTags = ["romantic", "love"];
+        response = "For a romantic date night, soft love ballads set the perfect mood.";
+      } else if (query.includes("edm") || query.includes("high energy")) {
+        matchedGenre = "energetic";
+        matchedTags = ["energetic", "edm"];
+        response = "For high-energy EDM, these tracks bring pulsating beats for parties or intense moments.";
+      } else if (query.includes("piano")) {
+        matchedGenre = "chill";
+        matchedTags = ["piano", "calm"];
+        response = "For piano music, these soothing tracks create a serene atmosphere.";
+      } else {
+        response = "We found some tracks that might match your vibe. Explore these suggestions!";
+        matchedGenre = "";
+        matchedTags = [];
+      }
+
+      const aiResponseSection = document.getElementById('aiResponse');
+      const aiResponseText = document.getElementById('aiResponseText');
+      aiResponseText.innerText = response;
+      aiResponseSection.classList.remove('hidden');
+
+      return { matchedGenre, matchedTags };
+    }
+
+    function searchMusic() {
+      const query = document.getElementById('searchInput').value;
+      if (!query) return;
+
+      fetch(`/api/recommend/?query=${encodeURIComponent(query)}`)
+        .then(response => response.json())
+        .then(data => {
+          if (data.recommendations) {
+            renderTracks(data.recommendations);
+            generateAIResponse(query);
+          } else {
+            console.error('No recommendations found:', data.error);
+            renderTracks([]);
+          }
+        })
+        .catch(error => {
+          console.error('Error fetching recommendations:', error);
+          renderTracks([]);
+        });
+    }
+
+    // Initial render with top 10 songs from server
+    document.addEventListener('DOMContentLoaded', () => {
+      fetch('/api/recommend/?query=popular') // Placeholder query for top songs
+        .then(response => response.json())
+        .then(data => {
+          if (data.recommendations) {
+            renderTracks(data.recommendations);
+          } else {
+            console.error('No initial tracks found:', data.error);
+            renderTracks([]);
+          }
+        })
+        .catch(error => {
+          console.error('Error fetching initial tracks:', error);
+          renderTracks([]);
+        });
+    });
+  </script>
 </body>
 </html>
