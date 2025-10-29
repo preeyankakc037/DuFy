@@ -1,83 +1,204 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>DUFy - Music Recommendation</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DuFy | Music Streaming</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+  <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/727/727245.png">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" integrity="sha512-Fo3rlrZj/k7ujTnHg4CGR2D7kSs0v4LLanw2qksYuRlEzO+tcaEPQogQ0KaoGN26/zrn20ImR1DfuLWnOo7aBA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+    }
+  </style>
 </head>
-<body class="bg-gray-50 font-sans">
 
-  <!-- Header -->
-  <header class="flex justify-between items-center p-6 bg-white shadow">
-    <div class="text-2xl font-bold text-blue-600 flex items-center gap-2">
-      <i class="fa-solid fa-music"></i> DUFy
-    </div>
-    <nav class="space-x-6">
-      <a href="#" class="text-gray-600 hover:text-blue-600">About</a>
-      <a href="#" class="text-gray-600 hover:text-blue-600">Contact</a>
-    </nav>
-  </header>
+<body class="bg-[#121212] text-white font-sans">
+  <!-- Sidebar -->
+  <div class="flex h-screen">
+    <aside class="w-60 bg-[#0e0e0e] p-5 flex flex-col justify-between">
+      <div>
+        <h1 class="text-3xl font-semibold text-green-400 mb-8 font-bold">DuFy</h1>
+        <nav class="space-y-5 text-gray-300">
+          <a href="#" class="flex items-center gap-3 hover:text-green-400 transition font-medium">
+            <i class="fas fa-home"></i> <span>Discover</span>
+          </a>
+          <a href="#" class="flex items-center gap-3 hover:text-green-400 transition font-medium">
+            <i class="fas fa-headphones"></i> <span>Genre</span>
+          </a>
+          <a href="#" class="flex items-center gap-3 hover:text-green-400 transition font-medium">
+            <i class="fas fa-chart-line"></i> <span>Top Charts</span>
+          </a>
+          <a href="#" class="flex items-center gap-3 hover:text-green-400 transition font-medium">
+            <i class="fas fa-fire"></i> <span>Trending</span>
+          </a>
+        </nav>
 
-  <!-- Hero / Search Section -->
-  <section class="text-center py-16 px-6">
-    <h1 class="text-4xl font-bold mb-4">Find Your Perfect Music</h1>
-    <p class="text-gray-600 mb-6">AI-powered music suggestions for creators. Describe your vibe and discover the perfect background track.</p>
-
-    <div class="flex justify-center gap-2 mb-4">
-      <input id="searchInput" type="text" placeholder="Type your mood or scene..." class="px-4 py-2 w-2/5 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500">
-      <button onclick="searchMusic()" class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700">Find Music</button>
-    </div>
-
-    <div class="flex justify-center gap-2 flex-wrap text-sm text-gray-500">
-      Try:
-      <span class="bg-gray-200 px-3 py-1 rounded cursor-pointer hover:bg-gray-300" onclick="setSearch('happy summer vlog')">happy summer vlog</span>
-      <span class="bg-gray-200 px-3 py-1 rounded cursor-pointer hover:bg-gray-300" onclick="setSearch('aesthetic travel reel')">aesthetic travel reel</span>
-      <span class="bg-gray-200 px-3 py-1 rounded cursor-pointer hover:bg-gray-300" onclick="setSearch('gaming intense moment')">gaming intense moment</span>
-      <span class="bg-gray-200 px-3 py-1 rounded cursor-pointer hover:bg-gray-300" onclick="setSearch('calm study session')">calm study session</span>
-      <span class="bg-gray-200 px-3 py-1 rounded cursor-pointer hover:bg-gray-300" onclick="setSearch('romantic date night')">romantic date night</span>
-      <span class="bg-gray-200 px-3 py-1 rounded cursor-pointer hover:bg-gray-300" onclick="setSearch('high energy EDM')">high energy EDM</span>
-      <span class="bg-gray-200 px-3 py-1 rounded cursor-pointer hover:bg-gray-300" onclick="setSearch('piano music')">piano music</span>
-    </div>
-  </section>
-
-  <!-- AI Response Section -->
-  <section id="aiResponse" class="text-center px-6 mb-8 hidden">
-    <h2 class="text-2xl font-semibold mb-2">AI Suggestion</h2>
-    <p id="aiResponseText" class="text-gray-600 max-w-2xl mx-auto"></p>
-  </section>
-
-  <!-- Suggested Tracks -->
-  <section class="grid grid-cols-1 md:grid-cols-3 gap-6 px-6 mb-16" id="tracksContainer">
-    <!-- Tracks will be injected here dynamically -->
-  </section>
-
-  <script>
-    function renderTracks(list) {
-      const container = document.getElementById('tracksContainer');
-      container.innerHTML = "";
-      list.forEach(track => {
-        const trackHTML = `
-        <div class="bg-white p-6 rounded-lg shadow">
-          <h2 class="font-semibold text-lg mb-1">${track.music_name}</h2>
-          <p class="text-gray-500 mb-2">${track.artist_name || 'Unknown Artist'}</p>
-          <p class="text-gray-400 text-sm mb-2">${track.genre || 'Unknown Genre'}</p>
-          <div class="flex gap-1 flex-wrap mb-3">
-            ${track.overlapping_emotions ? track.overlapping_emotions.split(/,\s*|\//).map(tag => `<span class="bg-blue-100 text-blue-600 px-2 py-0.5 rounded text-xs">${tag.trim()}</span>`).join('') : ''}
-          </div>
-          <div class="flex gap-2">
-            <button onclick="copyLink('${track.music_link}')" class="flex-1 border border-gray-300 px-4 py-2 rounded hover:bg-gray-100">
-              <i class="fa-solid fa-link"></i> Copy Link
-            </button>
-            <button onclick="playTrack('${track.music_link}')" class="flex-1 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
-              <i class="fa-solid fa-play"></i> Play
-            </button>
+        <div class="mt-10">
+          <h2 class="text-gray-400 uppercase text-sm mb-3 font-semibold">Library</h2>
+          <div class="space-y-3 text-gray-300">
+            <a href="#" class="hover:text-green-400 flex items-center gap-3 font-medium"><i class="fas fa-heart"></i> Favourites</a>
+            <a href="/playlist/" class="flex items-center gap-3 hover:text-green-400 font-medium"><i class="fas fa-list"></i> Playlist</a>
           </div>
         </div>
-        `;
-        container.innerHTML += trackHTML;
-      });
+      </div>
+
+      <div class="text-center text-sm text-gray-400">
+        <p class="mb-3 font-light">DuFy Online</p>
+      
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 overflow-y-auto">
+      <!-- Banner Section -->
+      <section class="relative">
+        <img src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e" alt="banner"
+          class="w-full h-64 object-cover opacity-90">
+        <div class="absolute inset-0 flex items-center justify-center">
+          <input id="searchInput" type="text" placeholder="Describe your music..."
+            class="w-3/4 md:w-1/2 px-6 py-3 rounded-full bg-green-900/70 text-white placeholder-gray-300 focus:outline-none font-medium">
+          <button onclick="searchMusic()" class="ml-2 bg-green-600 text-white px-6 py-2 rounded-full hover:bg-green-700 font-semibold">Find Music</button>
+        </div>
+      </section>
+
+      <!-- Top Picks -->
+      <section class="p-6" id="topPicksSection">
+        <h2 class="text-xl font-semibold mb-3 text-green-400 font-bold">Top Picks</h2>
+        <div id="topPicks" class="flex gap-5 overflow-x-auto pb-4">
+          <!-- Manual images with links -->
+          <a href="https://youtu.be/r7vgsKtMc2c?si=Qkn_RQ-gavM8hXmJ" target="_blank">
+            <img src="static/panchayat.png" class="w-40 h-40 rounded-xl hover:scale-105 transition">
+          </a>
+          <a href="https://youtu.be/tGv7CUutzqU?si=n85Y8ji-XbQyuIyO" target="_blank">
+            <img src="static/aboutyou.png" class="w-40 h-40 rounded-xl hover:scale-105 transition">
+          </a>
+          <a href="https://youtu.be/uNi5Go5dth8?si=JSTCGOhvUnoLaObK" target="_blank">
+            <img src="static/undown.png" class="w-40 h-40 rounded-xl hover:scale-105 transition">
+          </a>
+          <a href="https://youtu.be/T9Ybj8nrtQw?si=JvfcRfAccpIm3MkI" target="_blank">
+            <img src="static/assumptions.png" class="w-40 h-40 rounded-xl hover:scale-105 transition">
+          </a>
+          <a href="https://youtu.be/viimfQi_pUw?si=INQLeyxMGq2mT8eQ" target="_blank">
+            <img src="static/oceaneyes.png" class="w-40 h-40 rounded-xl hover:scale-105 transition">
+          </a>
+        </div>
+      </section>
+      <!-- AI Response Section
+      <section id="aiResponse" class="text-center px-6 mb-8 hidden">
+        <h2 class="text-2xl font-semibold mb-2 text-green-400 font-bold">AI Suggestion</h2>
+        <p id="aiResponseText" class="text-gray-300 max-w-2xl mx-auto font-medium">Some of the best matches for you</p>
+      </section> -->
+
+      <!-- Latest Album + Editor's Picks -->
+      <section class="px-6 grid md:grid-cols-2 gap-10">
+        <!-- Latest Album -->
+        <div>
+          <h2 class="text-lg font-semibold mb-3 text-green-400 font-bold">Best Matches</h2>
+          <ul id="latestAlbum" class="space-y-3">
+            <!-- Dynamically populated -->
+          </ul>
+        </div>
+
+        <!-- Editor's Picks -->
+        <div>
+          <h2 class="text-lg font-semibold mb-3 text-green-400 font-bold">Editor's Picks</h2>
+          <ul id="editorsPicks" class="space-y-3">
+            <!-- Dynamically populated -->
+          </ul>
+        </div>
+      </section>
+
+
+      <!-- Footer -->
+      <footer class="mt-10 bg-[#0e0e0e] py-10 px-6 text-gray-400 text-sm">
+        <div class="grid md:grid-cols-4 gap-8">
+          <div>
+            <h3 class="text-green-400 text-lg font-semibold mb-3 font-bold">DuFy</h3>
+            <p class="font-light">info@Dufyessence.com</p>
+            <p class="font-light">+977 9847696889</p>
+            <div class="flex gap-3 mt-3 text-white">
+              <a href="#" class="hover:text-gray-300"><i class="fab fa-facebook"></i></a>
+              <a href="#" class="hover:text-gray-300"><i class="fab fa-twitter"></i></a>
+              <a href="#" class="hover:text-gray-300"><i class="fab fa-instagram"></i></a>
+            </div>
+          </div>
+
+          <div>
+            <h4 class="text-white mb-2 font-medium font-semibold">Blog</h4>
+            <ul class="space-y-1">
+              <li><a href="#" class="hover:text-gray-300 font-light">Company</a></li>
+              <li><a href="#" class="hover:text-gray-300 font-light">Career</a></li>
+              <li><a href="#" class="hover:text-gray-300 font-light">Mobile</a></li>
+              <li><a href="/signup/" class="hover:text-gray-300 font-light">Signup</a></li>
+            </ul>
+          </div>
+
+          <div>
+            <h4 class="text-white mb-2 font-medium font-semibold">About</h4>
+            <ul class="space-y-1">
+              <li><a href="#" class="hover:text-gray-300 font-light">Contacts</a></li>
+              <li><a href="#" class="hover:text-gray-300 font-light">About Us</a></li>
+              <li><a href="#" class="hover:text-gray-300 font-light">FAQ</a></li>
+              <li><a href="#" class="hover:text-gray-300 font-light">Terms & Services</a></li>
+            </ul>
+          </div>
+
+          <div>
+            <h4 class="text-white mb-2 font-medium font-semibold">Product</h4>
+            <ul class="space-y-1">
+              <li><a href="#" class="hover:text-gray-300 font-light">Terms of Use</a></li>
+              <li><a href="#" class="hover:text-gray-300 font-light">Privacy Policy</a></li>
+              <li><a href="#" class="hover:text-gray-300 font-light">Login</a></li>
+              <li><a href="#" class="hover:text-gray-300 font-light">Download App</a></li>
+            </ul>
+          </div>
+        </div>
+        <div class="text-center mt-8 text-gray-500 font-light">© DuFy 2025 all copyright reserved</div>
+      </footer>
+    </main>
+  </div>
+
+  <script>
+    function renderTracks(list, containerId) {
+      const container = document.getElementById(containerId);
+      if (!container) {
+        console.error(`Container ${containerId} not found!`);
+        return;
+      }
+
+      // Only update topPicks if valid images are provided, otherwise keep manual images
+      if (containerId === 'topPicks' && list.length > 0) {
+        let hasValidImages = false;
+        list.forEach(track => {
+          if (track.image) hasValidImages = true;
+        });
+        if (hasValidImages) {
+          container.innerHTML = ""; // Clear only if replacing with new images
+          list.forEach(track => {
+            if (track.image) {
+              const a = document.createElement('a');
+              a.href = track.music_link || '#';
+              a.target = "_blank";
+              a.innerHTML = `<img src="${track.image}" class="w-40 h-40 rounded-xl hover:scale-105 transition">`;
+              container.appendChild(a);
+            }
+          });
+        }
+      } else if (list.length > 0 && (containerId === 'latestAlbum' || containerId === 'editorsPicks')) {
+        container.innerHTML = ""; // Clear for latestAlbum and editorsPicks
+        list.forEach(track => {
+          const li = document.createElement('li');
+          li.className = "flex justify-between hover:bg-[#1e1e1e] p-2 rounded-lg";
+          li.innerHTML = `
+            <span>${track.music_name} – ${track.artist_name || 'Unknown Artist'}</span>
+            <a href="${track.music_link || '#'}" target="_blank"><i class="fas fa-play"></i></a>
+          `;
+          container.appendChild(li);
+        });
+      }
     }
 
     function copyLink(url) {
@@ -100,42 +221,31 @@
 
     function generateAIResponse(query) {
       query = query.toLowerCase();
-      let response = "";
+      let response = "Some of the best matches for you";
       let matchedGenre = "";
       let matchedTags = [];
 
       if (query.includes("calm") || query.includes("meditative") || query.includes("study")) {
         matchedGenre = "chill";
         matchedTags = ["calm", "meditation"];
-        response = "For a peaceful meditative session, these soothing tracks create a serene atmosphere perfect for relaxation or focus.";
       } else if (query.includes("happy") || query.includes("summer") || query.includes("vlog")) {
         matchedGenre = "trending";
         matchedTags = ["fun", "pop"];
-        response = "For a happy summer vlog, upbeat and vibrant tracks will match the lively vibe!";
       } else if (query.includes("aesthetic") || query.includes("travel") || query.includes("reel")) {
         matchedGenre = "cinematic";
         matchedTags = ["epic", "dramatic"];
-        response = "For an aesthetic travel reel, cinematic tracks will elevate your visuals with a grand feel.";
       } else if (query.includes("gaming") || query.includes("intense")) {
         matchedGenre = "energetic";
         matchedTags = ["energetic", "dance"];
-        response = "For intense gaming moments, high-energy tracks will keep the adrenaline pumping.";
       } else if (query.includes("romantic") || query.includes("date")) {
         matchedGenre = "romantic";
         matchedTags = ["romantic", "love"];
-        response = "For a romantic date night, soft love ballads set the perfect mood.";
       } else if (query.includes("edm") || query.includes("high energy")) {
         matchedGenre = "energetic";
         matchedTags = ["energetic", "edm"];
-        response = "For high-energy EDM, these tracks bring pulsating beats for parties or intense moments.";
       } else if (query.includes("piano")) {
         matchedGenre = "chill";
         matchedTags = ["piano", "calm"];
-        response = "For piano music, these soothing tracks create a serene atmosphere.";
-      } else {
-        response = "We found some tracks that might match your vibe. Explore these suggestions!";
-        matchedGenre = "";
-        matchedTags = [];
       }
 
       const aiResponseSection = document.getElementById('aiResponse');
@@ -153,35 +263,52 @@
       fetch(`/api/recommend/?query=${encodeURIComponent(query)}`)
         .then(response => response.json())
         .then(data => {
-          if (data.recommendations) {
-            renderTracks(data.recommendations);
+          console.log('API Response:', data);
+          if (data.recommendations && data.recommendations.length > 0) {
+            renderTracks(data.recommendations.slice(0, 5), 'topPicks'); // First 5 for Top Picks
+            renderTracks(data.recommendations.slice(0, 4), 'latestAlbum'); // First 4 for Latest Album
+            renderTracks(data.recommendations.slice(4, 8), 'editorsPicks'); // Next 4 for Editor's Picks
             generateAIResponse(query);
           } else {
-            console.error('No recommendations found:', data.error);
-            renderTracks([]);
+            console.warn('No recommendations found, keeping manual topPicks images.');
+            renderTracks([], 'latestAlbum');
+            renderTracks([], 'editorsPicks');
           }
         })
         .catch(error => {
           console.error('Error fetching recommendations:', error);
-          renderTracks([]);
+          renderTracks([], 'latestAlbum');
+          renderTracks([], 'editorsPicks');
         });
     }
 
     // Initial render with top 10 songs from server
     document.addEventListener('DOMContentLoaded', () => {
-      fetch('/api/recommend/?query=popular') // Placeholder query for top songs
+      console.log("DOM fully loaded, checking topPicksSection...");
+      const topPicksSection = document.getElementById('topPicksSection');
+      if (topPicksSection) {
+        console.log("topPicksSection found:", topPicksSection);
+      } else {
+        console.error("topPicksSection not found in DOM!");
+      }
+      fetch('/api/recommend/?query=popular')
         .then(response => response.json())
         .then(data => {
-          if (data.recommendations) {
-            renderTracks(data.recommendations);
+          console.log('Initial API Response:', data);
+          if (data.recommendations && data.recommendations.length > 0) {
+            renderTracks(data.recommendations.slice(0, 5), 'topPicks'); // First 5 for Top Picks
+            renderTracks(data.recommendations.slice(0, 4), 'latestAlbum'); // First 4 for Latest Album
+            renderTracks(data.recommendations.slice(4, 8), 'editorsPicks'); // Next 4 for Editor's Picks
           } else {
-            console.error('No initial tracks found:', data.error);
-            renderTracks([]);
+            console.warn('No initial recommendations, keeping manual topPicks images.');
+            renderTracks([], 'latestAlbum');
+            renderTracks([], 'editorsPicks');
           }
         })
         .catch(error => {
           console.error('Error fetching initial tracks:', error);
-          renderTracks([]);
+          renderTracks([], 'latestAlbum');
+          renderTracks([], 'editorsPicks');
         });
     });
   </script>

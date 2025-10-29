@@ -3,6 +3,11 @@ from django.shortcuts import render
 from .recommender import recommend_songs
 from .models import Song
 from typing import List, Dict
+from django.views.generic import TemplateView
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from django.contrib.auth.models import User
+from django.urls import reverse
 
 def index(request):
     """
@@ -46,3 +51,27 @@ def get_recommendations(request):
         return JsonResponse({'error': f'Failed to generate recommendations: {str(e)}'}, status=500)
 
     return JsonResponse({'recommendations': recommendations})
+
+
+
+class SignupView(TemplateView):
+    template_name = 'signup.html'
+
+    def post(self, request, *args, **kwargs):
+        username = request.POST.get('username')
+        email = request.POST.get('email')
+        password = request.POST.get('password')
+        password_confirm = request.POST.get('password_confirm')
+
+        if password != password_confirm:
+            messages.error(request, "Passwords don't match.")
+            return render(request, 'signup.html')
+        # Here you'd normally create a user with Django auth
+        messages.success(request, f"Account created for {username}! (This is a demo.)")
+        return redirect('signup')  # Redirect back to signup page for now
+    
+class PlaylistView(TemplateView):
+    template_name = 'playlist.html'
+
+    def get(self, request, *args, **kwargs):
+        return render(request, 'playlist.html', {'messages': messages.get_messages(request)})
