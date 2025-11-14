@@ -8,12 +8,5 @@ scikit-learn
 faiss-cpu
 djangorestframework
 django-cors-headers
-
-# FORCE CLEAN DOWNLOAD (CRITICAL)
---no-cache-dir
-
-# CPU-ONLY TORCH (ONLY ONCE!)
-torch==2.4.1 --index-url https://download.pytorch.org/whl/cpu
-
-# SENTENCE TRANSFORMERS
+torch==2.4.1 
 sentence-transformers==3.1.1
