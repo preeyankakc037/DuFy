@@ -4,10 +4,16 @@ whitenoise
 pytz
 numpy
 pandas
-torch
 scikit-learn
 faiss-cpu
 djangorestframework
 django-cors-headers
-sentence-transformers
-torch --index-url https://download.pytorch.org/whl/cpu
+
+# FORCE CLEAN DOWNLOAD (CRITICAL)
+--no-cache-dir
+
+# CPU-ONLY TORCH (ONLY ONCE!)
+torch==2.4.1 --index-url https://download.pytorch.org/whl/cpu
+
+# SENTENCE TRANSFORMERS
+sentence-transformers==3.1.1
