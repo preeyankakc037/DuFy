@@ -6,13 +6,10 @@ Production-ready, secure, cached, logged, and optimized for FAISS + DRF.
 import os
 from pathlib import Path
 
-# ----------------------------------------------------------------------
-# Build paths
-# ----------------------------------------------------------------------
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # ----------------------------------------------------------------------
-# Security & Environment
+# Security
 # ----------------------------------------------------------------------
 SECRET_KEY = os.environ.get(
     "DJANGO_SECRET_KEY",
@@ -21,13 +18,15 @@ SECRET_KEY = os.environ.get(
 
 DEBUG = os.environ.get("DJANGO_DEBUG", "True") == "True"
 
+# VERCEL → allow frontend + Vercel serverless URL
 ALLOWED_HOSTS = [
-    h.strip() for h in os.environ.get("DJANGO_ALLOWED_HOSTS", "*").split(",")
+    h.strip()
+    for h in os.environ.get("DJANGO_ALLOWED_HOSTS", "*").split(",")
     if h.strip()
 ]
 
 # ----------------------------------------------------------------------
-# Application definition
+# Apps
 # ----------------------------------------------------------------------
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -39,7 +38,7 @@ INSTALLED_APPS = [
 
     # Third-party
     "rest_framework",
-    "corsheaders",  # <── ADDED
+    "corsheaders",
 
     # Local
     "recommendations",
@@ -49,14 +48,18 @@ INSTALLED_APPS = [
 # Middleware
 # ----------------------------------------------------------------------
 MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware',  # <── MUST BE FIRST
-    'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    "corsheaders.middleware.CorsMiddleware",
+    "django.middleware.security.SecurityMiddleware",
+
+    # VERCEL → Add whitenoise middleware
+    "whitenoise.middleware.WhiteNoiseMiddleware",
+
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.common.CommonMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
 ROOT_URLCONF = "backend.urls"
@@ -83,7 +86,7 @@ TEMPLATES = [
 WSGI_APPLICATION = "backend.wsgi.application"
 
 # ----------------------------------------------------------------------
-# Database
+# Database (SQLite supported on Vercel)
 # ----------------------------------------------------------------------
 DATABASES = {
     "default": {
@@ -93,7 +96,7 @@ DATABASES = {
 }
 
 # ----------------------------------------------------------------------
-# Password validation
+# Authentication
 # ----------------------------------------------------------------------
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
@@ -111,22 +114,22 @@ USE_I18N = True
 USE_TZ = True
 
 # ----------------------------------------------------------------------
-# Static & Media Files
+# Static & Media Files (VERCEL REQUIRED)
 # ----------------------------------------------------------------------
 STATIC_URL = "/static/"
-STATICFILES_DIRS = [BASE_DIR / "static"]
+STATICFILES_DIRS = [BASE_DIR / "static"]  # local static
+
+# VERCEL → collects into staticfiles for build output
 STATIC_ROOT = BASE_DIR / "staticfiles"
+
+# VERCEL → enable compressed asset serving
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
 # ----------------------------------------------------------------------
-# Default primary key
-# ----------------------------------------------------------------------
-DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
-
-# ----------------------------------------------------------------------
-# Django REST Framework
+# DRF
 # ----------------------------------------------------------------------
 REST_FRAMEWORK = {
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
@@ -143,7 +146,7 @@ REST_FRAMEWORK = {
 }
 
 # ----------------------------------------------------------------------
-# Caching (Redis → LocMem fallback)
+# Cache (Redis → fallback)
 # ----------------------------------------------------------------------
 REDIS_URL = os.environ.get("REDIS_URL")
 
@@ -168,7 +171,7 @@ else:
     }
 
 # ----------------------------------------------------------------------
-# Logging
+# Logging (kept as is)
 # ----------------------------------------------------------------------
 LOG_DIR = BASE_DIR / "logs"
 LOG_DIR.mkdir(exist_ok=True)
@@ -214,7 +217,7 @@ LOGGING = {
 }
 
 # ----------------------------------------------------------------------
-# Security Settings (Production-ready)
+# Security
 # ----------------------------------------------------------------------
 SECURE_BROWSER_XSS_FILTER = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
@@ -227,12 +230,15 @@ SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SECURE = not DEBUG
 CSRF_COOKIE_HTTPONLY = False
 CSRF_COOKIE_SECURE = not DEBUG
+
+# VERCEL → Add CSRF trust for vercel.app
 CSRF_TRUSTED_ORIGINS = [
+    "https://*.vercel.app",
     "http://localhost:8000",
     "http://127.0.0.1:8000",
 ]
 
 # ----------------------------------------------------------------------
-# CORS (Development)
+# CORS
 # ----------------------------------------------------------------------
-CORS_ALLOW_ALL_ORIGINS = True  # <── ADDED (remove in production)
+CORS_ALLOW_ALL_ORIGINS = True
