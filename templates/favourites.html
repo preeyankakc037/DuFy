@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Your Favourites – DuFy{% endblock %}
+
+{% block content %}
+<section id="favourites" class="pl-0 pr-15 py-15 -ml-16"
+>
+  <!-- Page Title -->
+  <h2 class="text-4xl font-extrabold mb-10 text-white">Your Favourites</h2>
+
+  <!-- Favourites Grid -->
+  <div class="flex flex-wrap gap-8">
+    <!-- Image 1 -->
+    <div class="w-80 h-56 rounded-xl overflow-hidden shadow-md hover:shadow-lg transition transform hover:scale-105 cursor-pointer">
+      <img
+        src="https://images.unsplash.com/photo-1511379938547-c1f69419868d?auto=format&fit=crop&w=1000&q=80"
+        alt="Acoustic Studio Drums"
+        class="w-full h-full object-cover"
+      />
+    </div>
+
+    <!-- Image 2 -->
+    <div class="w-80 h-56 rounded-xl overflow-hidden shadow-md hover:shadow-lg transition transform hover:scale-105 cursor-pointer">
+      <img
+        src="https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?auto=format&fit=crop&w=1000&q=80"
+        alt="Rock Concert Performance"
+        class="w-full h-full object-cover"
+      />
+    </div>
+  </div>
+</section>
+{% endblock %}

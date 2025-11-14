@@ -1,100 +1,41 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>DuFy - Genre</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-black text-white flex flex-col h-screen">
-  <!-- MAIN CONTENT -->
-  <main class="flex-1 flex flex-col justify-between overflow-y-auto">
-    <!-- Header -->
-    <div class="p-8">
-      <h2 class="text-4xl font-bold mb-6">Your Playlists</h2>
-      <!-- Playlist Cards -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        <!-- CARD 1 -->
-        <div class="bg-neutral-900 rounded-xl overflow-hidden shadow-lg hover:scale-105 transition-transform cursor-pointer">
-          <img src="https://images.unsplash.com/photo-1511379938547-c1f69419868d" alt="playlist1" class="w-full h-56 object-cover">
-        </div>
-        <!-- CARD 2 -->
-        <div class="bg-neutral-900 rounded-xl overflow-hidden shadow-lg hover:scale-105 transition-transform cursor-pointer">
-          <img src="https://images.unsplash.com/photo-1507874457470-272b3c8d8ee2" alt="playlist2" class="w-full h-56 object-cover">
-        </div>
-        <!-- CARD 3 -->
-        <div class="bg-neutral-900 rounded-xl overflow-hidden shadow-lg hover:scale-105 transition-transform cursor-pointer">
-          <img src="https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91" alt="playlist3" class="w-full h-56 object-cover">
-        </div>
-      </div>
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Your Playlists – DuFy{% endblock %}
+
+{% block content %}
+<section id="playlists" class="pl-0 pr-15 py-15 -ml-16">
+  <h2 class="text-3xl font-bold mb-8 text-white">Your Playlists</h2>
+
+  <div class="flex flex-wrap gap-8">
+
+    <!-- ✅ Playlist 1 — New working image -->
+    <div class="rounded-xl overflow-hidden shadow-lg hover:scale-105 transition cursor-pointer">
+      <img
+        src="https://images.unsplash.com/photo-1510915361894-db8b60106cb1?auto=format&fit=crop&w=900&q=80"
+        alt="Studio Room"
+        class="w-72 h-48 object-cover"
+      />
     </div>
 
-    <!-- Footer -->
-    <footer class="bg-black border-t border-gray-800 px-8 py-6 grid grid-cols-2 md:grid-cols-4 gap-6">
-      <div>
-        <h3 class="text-green-500 text-xl font-bold mb-2">DuFy</h3>
-        <p class="text-sm text-gray-400">info@dufypresence.com</p>
-        <p class="text-sm text-gray-400">+997 3847398939</p>
-        <div class="flex gap-4 mt-3 text-gray-400">
-          <i>🎵</i>
-          <i>📸</i>
-          <!-- Instagram Icon -->
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M7.75 2h8.5A5.75 5.75 0 0122 7.75v8.5A5.75 5.75 0 0116.25 22h-8.5A5.75 5.75 0 012 16.25v-8.5A5.75 5.75 0 017.75 2zm0 1.5A4.25 4.25 0 003.5 7.75v8.5A4.25 4.25 0 007.75 20.5h8.5a4.25 4.25 0 004.25-4.25v-8.5A4.25 4.25 0 0016.25 3.5h-8.5zm8.75 2a.75.75 0 110 1.5.75.75 0 010-1.5zm-4.25 1.25a5.25 5.25 0 110 10.5 5.25 5.25 0 010-10.5zm0 1.5a3.75 3.75 0 100 7.5 3.75 3.75 0 000-7.5z"/>
-          </svg>
-          <i>💬</i>
-        </div>
-      </div>
-      <div>
-        <h3 class="font-semibold mb-3">Blog</h3>
-        <ul class="text-gray-400 space-y-2 text-sm">
-          <li><a href="#">Company</a></li>
-          <li><a href="#">Career</a></li>
-          <li><a href="#">Mobile</a></li>
-          <li><a href="#">How it works?</a></li>
-        </ul>
-      </div>
-      <div>
-        <h3 class="font-semibold mb-3">About</h3>
-        <ul class="text-gray-400 space-y-2 text-sm">
-          <li><a href="#">Contacts</a></li>
-          <li><a href="#">About us</a></li>
-          <li><a href="#">FAQ</a></li>
-          <li><a href="#">Our Teams</a></li>
-        </ul>
-      </div>
-      <div>
-        <h3 class="font-semibold mb-3">Product</h3>
-        <ul class="text-gray-400 space-y-2 text-sm">
-          <li><a href="#">Terms of use</a></li>
-          <li><a href="#">Privacy policy</a></li>
-          <li><a href="#">Login</a></li>
-        </ul>
-      </div>
-    </footer>
-
-    <!-- Music Player Bar -->
-    <div class="bg-neutral-900 border-t border-gray-800 px-6 py-3 flex items-center justify-between">
-      <div class="flex items-center gap-4">
-        <img src="https://images.unsplash.com/photo-1507874457470-272b3c8d8ee2" class="w-12 h-12 rounded" alt="song cover">
-        <div>
-          <p class="font-semibold">Depth Drop is Deep</p>
-          <p class="text-sm text-gray-400">Dilan Polat</p>
-        </div>
-      </div>
-      <div class="flex items-center gap-6">
-        <button class="text-xl">⏮</button>
-        <button class="text-2xl bg-green-500 rounded-full p-2 text-black">▶</button>
-        <button class="text-xl">⏭</button>
-      </div>
-      <div class="flex-1 mx-4 flex items-center gap-2">
-        <span class="text-xs text-gray-400">2:34</span>
-        <div class="w-full bg-gray-700 rounded-full h-1">
-          <div class="bg-green-500 h-1 rounded-full" style="width: 45%;"></div>
-        </div>
-        <span class="text-xs text-gray-400">4:52</span>
-      </div>
+    <!-- Playlist 2 -->
+    <div class="rounded-xl overflow-hidden shadow-lg hover:scale-105 transition cursor-pointer">
+      <img
+        src="https://images.unsplash.com/photo-1506157786151-b8491531f063?auto=format&fit=crop&w=900&q=80"
+        alt="Singer Performing"
+        class="w-72 h-48 object-cover"
+      />
     </div>
-  </main>
-</body>
-</html>
+
+    <!-- ✅ Playlist 3 — New working image -->
+    <div class="rounded-xl overflow-hidden shadow-lg hover:scale-105 transition cursor-pointer">
+      <img
+        src="https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?auto=format&fit=crop&w=900&q=80"
+        alt="Concert Crowd"
+        class="w-72 h-48 object-cover"
+      />
+    </div>
+
+  </div>
+</section>
+{% endblock %}

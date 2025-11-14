@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Browse by Genre – DuFy{% endblock %}
+
+{% block content %}
+<section id="genre" class= "pl-0 pr-15 py-15 -ml-16">
+  <h2 class="text-4xl font-extrabold mb-8 text-white">Browse by Genre</h2>
+
+  <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-8">
+    <!-- Rock -->
+    <div class="relative bg-gray-900 rounded-2xl overflow-hidden shadow-md hover:scale-105 transition transform cursor-pointer group">
+      <img src="https://images.unsplash.com/photo-1511379938547-c1f69419868d?auto=format&fit=crop&w=800&q=80"
+           alt="Rock" class="w-full h-44 object-cover group-hover:opacity-75 transition duration-300">
+      <div class="absolute inset-0 flex items-center justify-center bg-black/40 md:bg-black/0 md:group-hover:bg-black/40 transition duration-300">
+        <h3 class="text-white font-semibold text-xl text-center drop-shadow-md opacity-100 md:opacity-0 md:group-hover:opacity-100 transition duration-300">
+          Rock 🎸
+        </h3>
+      </div>
+    </div>
+
+    <!-- Pop -->
+    <div class="relative bg-gray-900 rounded-2xl overflow-hidden shadow-md hover:scale-105 transition transform cursor-pointer group">
+      <img src="https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=800&q=80"
+           alt="Pop" class="w-full h-44 object-cover group-hover:opacity-75 transition duration-300">
+      <div class="absolute inset-0 flex items-center justify-center bg-black/40 md:bg-black/0 md:group-hover:bg-black/40 transition duration-300">
+        <h3 class="text-white font-semibold text-xl text-center drop-shadow-md opacity-100 md:opacity-0 md:group-hover:opacity-100 transition duration-300">
+          Pop 🎤
+        </h3>
+      </div>
+    </div>
+
+    <!-- Jazz -->
+    <div class="relative bg-gray-900 rounded-2xl overflow-hidden shadow-md hover:scale-105 transition transform cursor-pointer group">
+      <img src="https://images.unsplash.com/photo-1504805572947-34fad45aed93?auto=format&fit=crop&w=800&q=80"
+           alt="Jazz" class="w-full h-44 object-cover group-hover:opacity-75 transition duration-300">
+      <div class="absolute inset-0 flex items-center justify-center bg-black/40 md:bg-black/0 md:group-hover:bg-black/40 transition duration-300">
+        <h3 class="text-white font-semibold text-xl text-center drop-shadow-md opacity-100 md:opacity-0 md:group-hover:opacity-100 transition duration-300">
+          Jazz 🎷
+        </h3>
+      </div>
+    </div>
+
+    <!-- Hip-Hop -->
+    <div class="relative bg-gray-900 rounded-2xl overflow-hidden shadow-md hover:scale-105 transition transform cursor-pointer group">
+      <img src="https://images.unsplash.com/photo-1487180144351-b8472da7d491?auto=format&fit=crop&w=800&q=80"
+           alt="Hip-Hop" class="w-full h-44 object-cover group-hover:opacity-75 transition duration-300">
+      <div class="absolute inset-0 flex items-center justify-center bg-black/40 md:bg-black/0 md:group-hover:bg-black/40 transition duration-300">
+        <h3 class="text-white font-semibold text-xl text-center drop-shadow-md opacity-100 md:opacity-0 md:group-hover:opacity-100 transition duration-300">
+          Hip-Hop 🧢
+        </h3>
+      </div>
+    </div>
+
+    <!-- Classical -->
+    <div class="relative bg-gray-900 rounded-2xl overflow-hidden shadow-md hover:scale-105 transition transform cursor-pointer group">
+      <img src="https://images.unsplash.com/photo-1507838153414-b4b713384a76?auto=format&fit=crop&w=800&q=80"
+           alt="Classical" class="w-full h-44 object-cover group-hover:opacity-75 transition duration-300">
+      <div class="absolute inset-0 flex items-center justify-center bg-black/40 md:bg-black/0 md:group-hover:bg-black/40 transition duration-300">
+        <h3 class="text-white font-semibold text-xl text-center drop-shadow-md opacity-100 md:opacity-0 md:group-hover:opacity-100 transition duration-300">
+          Classical 🎼
+        </h3>
+      </div>
+    </div>
+
+    <!-- Electronic -->
+    <div class="relative bg-gray-900 rounded-2xl overflow-hidden shadow-md hover:scale-105 transition transform cursor-pointer group">
+      <img src="https://images.unsplash.com/photo-1518972559570-7cc1309f3229?auto=format&fit=crop&w=800&q=80"
+           alt="Electronic" class="w-full h-44 object-cover group-hover:opacity-75 transition duration-300">
+      <div class="absolute inset-0 flex items-center justify-center bg-black/40 md:bg-black/0 md:group-hover:bg-black/40 transition duration-300">
+        <h3 class="text-white font-semibold text-xl text-center drop-shadow-md opacity-100 md:opacity-0 md:group-hover:opacity-100 transition duration-300">
+          Electronic 🎧
+        </h3>
+      </div>
+    </div>
+
+    <!-- Acoustic -->
+    <div class="relative bg-gray-900 rounded-2xl overflow-hidden shadow-md hover:scale-105 transition transform cursor-pointer group">
+      <img src="https://images.unsplash.com/photo-1510915361894-db8b60106cb1?auto=format&fit=crop&w=800&q=80"
+           alt="Acoustic" class="w-full h-44 object-cover group-hover:opacity-75 transition duration-300">
+      <div class="absolute inset-0 flex items-center justify-center bg-black/40 md:bg-black/0 md:group-hover:bg-black/40 transition duration-300">
+        <h3 class="text-white font-semibold text-xl text-center drop-shadow-md opacity-100 md:opacity-0 md:group-hover:opacity-100 transition duration-300">
+          Acoustic 🎵
+        </h3>
+      </div>
+    </div>
+
+    <!-- Indie -->
+    <div class="relative bg-gray-900 rounded-2xl overflow-hidden shadow-md hover:scale-105 transition transform cursor-pointer group">
+      <img src="https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?auto=format&fit=crop&w=800&q=80"
+           alt="Indie" class="w-full h-44 object-cover group-hover:opacity-75 transition duration-300">
+      <div class="absolute inset-0 flex items-center justify-center bg-black/40 md:bg-black/0 md:group-hover:bg-black/40 transition duration-300">
+        <h3 class="text-white font-semibold text-xl text-center drop-shadow-md opacity-100 md:opacity-0 md:group-hover:opacity-100 transition duration-300">
+          Indie 🎶
+        </h3>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

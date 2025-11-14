@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Trending Now – DuFy{% endblock %}
+
+{% block content %}
+<section id="trending" class="pl-0 pr-15 py-15 -ml-16 bg-[#0e0e0e] min-h-screen">
+  <!-- Header -->
+  <div class="flex items-center mb-8">
+    <!-- Trending arrow icon -->
+    <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 text-green-400 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 17l6-6 4 4 8-8" />
+    </svg>
+    <h2 class="text-3xl font-bold text-white">Trending Now</h2>
+  </div>
+
+  <!-- Grid -->
+  <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+
+    <!-- 1. Recording Studio -->
+    <div class="relative group rounded-2xl overflow-hidden cursor-pointer">
+      <img
+        src="https://images.unsplash.com/photo-1602526432604-bdfb3b1a83dc?auto=format&fit=crop&w=1000&q=80"
+        alt="Recording Studio"
+        class="w-full h-60 object-cover transition-transform duration-500 group-hover:scale-105"
+      />
+      <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent opacity-0 group-hover:opacity-100 transition duration-500 flex items-end p-4">
+        <h3 class="text-white font-semibold text-lg">Recording Studio</h3>
+      </div>
+    </div>
+
+    <!-- 2. Live Performance -->
+    <div class="relative group rounded-2xl overflow-hidden cursor-pointer">
+      <img
+        src="https://images.unsplash.com/photo-1507874457470-272b3c8d8ee2?auto=format&fit=crop&w=1000&q=80"
+        alt="Live Performance"
+        class="w-full h-60 object-cover transition-transform duration-500 group-hover:scale-105"
+      />
+      <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent opacity-0 group-hover:opacity-100 transition duration-500 flex items-end p-4">
+        <h3 class="text-white font-semibold text-lg">Live Performance</h3>
+      </div>
+    </div>
+
+    <!-- 3. DJ in Action -->
+    <div class="relative group rounded-2xl overflow-hidden cursor-pointer">
+      <img
+        src="https://images.unsplash.com/photo-1530893609608-32a9af3aa95c?auto=format&fit=crop&w=1000&q=80"
+        alt="DJ in Action"
+        class="w-full h-60 object-cover transition-transform duration-500 group-hover:scale-105"
+      />
+      <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent opacity-0 group-hover:opacity-100 transition duration-500 flex items-end p-4">
+        <h3 class="text-white font-semibold text-lg">DJ in Action</h3>
+      </div>
+    </div>
+
+    <!-- 4. Guitar Session -->
+    <div class="relative group rounded-2xl overflow-hidden cursor-pointer">
+      <img
+        src="https://images.unsplash.com/photo-1521336575822-6da63fb45455?auto=format&fit=crop&w=1000&q=80"
+        alt="Guitar Session"
+        class="w-full h-60 object-cover transition-transform duration-500 group-hover:scale-105"
+      />
+      <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent opacity-0 group-hover:opacity-100 transition duration-500 flex items-end p-4">
+        <h3 class="text-white font-semibold text-lg">Guitar Session</h3>
+      </div>
+    </div>
+
+    <!-- 5. Festival Lights -->
+    <div class="relative group rounded-2xl overflow-hidden cursor-pointer">
+      <img
+        src="https://images.unsplash.com/photo-1518972559570-7cc1309f3229?auto=format&fit=crop&w=1000&q=80"
+        alt="Festival Lights"
+        class="w-full h-60 object-cover transition-transform duration-500 group-hover:scale-105"
+      />
+      <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent opacity-0 group-hover:opacity-100 transition duration-500 flex items-end p-4">
+        <h3 class="text-white font-semibold text-lg">Festival Lights</h3>
+      </div>
+    </div>
+
+    <!-- 6. Vinyl Groove -->
+    <div class="relative group rounded-2xl overflow-hidden cursor-pointer">
+      <img
+        src="https://images.unsplash.com/photo-1508973377-a3d9a5a7c13a?auto=format&fit=crop&w=1000&q=80"
+        alt="Vinyl Groove"
+        class="w-full h-60 object-cover transition-transform duration-500 group-hover:scale-105"
+      />
+      <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent opacity-0 group-hover:opacity-100 transition duration-500 flex items-end p-4">
+        <h3 class="text-white font-semibold text-lg">Vinyl Groove</h3>
+      </div>
+    </div>
+
+    <!-- 7. Mic Check -->
+    <div class="relative group rounded-2xl overflow-hidden cursor-pointer">
+      <img
+        src="https://images.unsplash.com/photo-1518544801958-efcbf8a7ec10?auto=format&fit=crop&w=1000&q=80"
+        alt="Mic Check"
+        class="w-full h-60 object-cover transition-transform duration-500 group-hover:scale-105"
+      />
+      <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent opacity-0 group-hover:opacity-100 transition duration-500 flex items-end p-4">
+        <h3 class="text-white font-semibold text-lg">Mic Check</h3>
+      </div>
+    </div>
+
+    <!-- 8. Neon Studio -->
+    <div class="relative group rounded-2xl overflow-hidden cursor-pointer">
+      <img
+        src="https://images.unsplash.com/photo-1581276879432-15a89a3b325c?auto=format&fit=crop&w=1000&q=80"
+        alt="Neon Studio"
+        class="w-full h-60 object-cover transition-transform duration-500 group-hover:scale-105"
+      />
+      <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent opacity-0 group-hover:opacity-100 transition duration-500 flex items-end p-4">
+        <h3 class="text-white font-semibold text-lg">Neon Studio</h3>
+      </div>
+    </div>
+
+  </div>
+</section>
+{% endblock %}

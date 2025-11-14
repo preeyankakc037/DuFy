@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Top Charts – DuFy{% endblock %}
+
+{% block content %}
+
+<section class="p-8">
+    <h2 class="text-4xl font-bold text-white mb-10">Top Charts</h2>
+
+    <div class="flex flex-col gap-4">
+
+        <!-- 1 -->
+        <div class="bg-[#1a1a1a] hover:bg-[#1f1f1f] transition p-4 rounded-xl flex items-center justify-between cursor-pointer">
+            <div class="flex items-center gap-4">
+                <span class="text-green-500 font-bold text-2xl">1</span>
+                <img src="https://images.unsplash.com/photo-1487180144351-b8472da7d491?auto=format&fit=crop&w=200&q=80"
+                    class="w-16 h-16 object-cover rounded-lg" />
+                <div>
+                    <p class="text-white font-semibold text-lg">Blinding Lights</p>
+                    <p class="text-gray-400 text-sm">The Weeknd</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-4">
+                <p class="text-gray-400 text-sm">2.5M</p>
+                <button class="bg-green-500 w-10 h-10 rounded-full flex items-center justify-center">
+                    ▶
+                </button>
+            </div>
+        </div>
+
+        <!-- 2 -->
+        <div class="bg-[#1a1a1a] hover:bg-[#1f1f1f] transition p-4 rounded-xl flex items-center justify-between cursor-pointer">
+            <div class="flex items-center gap-4">
+                <span class="text-green-500 font-bold text-2xl">2</span>
+                <img src="https://images.unsplash.com/photo-1507874457470-272b3c8d8ee2?auto=format&fit=crop&w=200&q=80"
+                    class="w-16 h-16 object-cover rounded-lg" />
+                <div>
+                    <p class="text-white font-semibold text-lg">Shape of You</p>
+                    <p class="text-gray-400 text-sm">Ed Sheeran</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-4">
+                <p class="text-gray-400 text-sm">2.3M</p>
+                <button class="bg-green-500 w-10 h-10 rounded-full flex items-center justify-center">
+                    ▶
+                </button>
+            </div>
+        </div>
+
+        <!-- 3 -->
+        <div class="bg-[#1a1a1a] hover:bg-[#1f1f1f] transition p-4 rounded-xl flex items-center justify-between cursor-pointer">
+            <div class="flex items-center gap-4">
+                <span class="text-green-500 font-bold text-2xl">3</span>
+                <img src="https://images.unsplash.com/photo-1511379938547-c1f69419868d?auto=format&fit=crop&w=200&q=80"
+                    class="w-16 h-16 object-cover rounded-lg" />
+                <div>
+                    <p class="text-white font-semibold text-lg">Someone You Loved</p>
+                    <p class="text-gray-400 text-sm">Lewis Capaldi</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-4">
+                <p class="text-gray-400 text-sm">2.1M</p>
+                <button class="bg-green-500 w-10 h-10 rounded-full flex items-center justify-center">
+                    ▶
+                </button>
+            </div>
+        </div>
+
+        <!-- 4 -->
+        <div class="bg-[#1a1a1a] hover:bg-[#1f1f1f] transition p-4 rounded-xl flex items-center justify-between cursor-pointer">
+            <div class="flex items-center gap-4">
+                <span class="text-green-500 font-bold text-2xl">4</span>
+                <img src="https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=200&q=80"
+                    class="w-16 h-16 object-cover rounded-lg" />
+                <div>
+                    <p class="text-white font-semibold text-lg">Dance Monkey</p>
+                    <p class="text-gray-400 text-sm">Tones and I</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-4">
+                <p class="text-gray-400 text-sm">1.9M</p>
+                <button class="bg-green-500 w-10 h-10 rounded-full flex items-center justify-center">
+                    ▶
+                </button>
+            </div>
+        </div>
+
+        <!-- 5 -->
+        <div class="bg-[#1a1a1a] hover:bg-[#1f1f1f] transition p-4 rounded-xl flex items-center justify-between cursor-pointer">
+            <div class="flex items-center gap-4">
+                <span class="text-green-500 font-bold text-2xl">5</span>
+                <img src="https://images.unsplash.com/photo-1511376777868-611b54f68947?auto=format&fit=crop&w=200&q=80"
+                    class="w-16 h-16 object-cover rounded-lg" />
+                <div>
+                    <p class="text-white font-semibold text-lg">Watermelon Sugar</p>
+                    <p class="text-gray-400 text-sm">Harry Styles</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-4">
+                <p class="text-gray-400 text-sm">1.8M</p>
+                <button class="bg-green-500 w-10 h-10 rounded-full flex items-center justify-center">
+                    ▶
+                </button>
+            </div>
+        </div>
+
+        <!-- You can continue more -->
+
+    </div>
+</section>
+
+{% endblock %}

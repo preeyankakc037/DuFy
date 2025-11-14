@@ -1,13 +1,20 @@
+# recommendations/urls.py
 from django.urls import path
-from .views import get_recommendations, index
-from .views import SignupView ,PlaylistView
-
+from . import views
 
 urlpatterns = [
-    path('', index, name='index'),
-    path('api/recommend/', get_recommendations, name='get_recommendations'),
-    path('signup/', SignupView.as_view(), name='signup'),
-    path('playlist/', PlaylistView.as_view(), name='playlist'),
+    # Pages
+    path('', views.discover_view, name='discover'),
+    path('genre/', views.genre_view, name='genre'),
+    path('top-charts/', views.top_charts_view, name='top_charts'),
+    path('trending/', views.trending_view, name='trending'),
+    path('favourites/', views.favourites_view, name='favourites'),
+    path('playlist/', views.playlist_view, name='playlist'),
+    path('signup/', views.signup_view, name='signup'),
+
+    # APIs
+    path('api/search/', views.search_api, name='search_api'),
+    path('api/recommend/', views.get_recommendations, name='get_recommendations'),  # ✅ fixed endpoint
+    path('recommend_songs/', views.get_recommendations),  # ← added alias
+
 ]
-
-

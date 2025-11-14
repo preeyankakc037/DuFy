@@ -1,77 +1,131 @@
-from django.http import JsonResponse
+import logging
+import os
+import random
+import pandas as pd
 from django.shortcuts import render
-from .recommender import recommend_songs
-from .models import Song
-from typing import List, Dict
-from django.views.generic import TemplateView
-from django.shortcuts import render, redirect
-from django.contrib import messages
-from django.contrib.auth.models import User
-from django.urls import reverse
+from django.http import JsonResponse
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from .utils.search_engine import search_songs
 
-def index(request):
-    """
-    Render the main page with top 10 songs by popularity_trend_score.
-    Passes initial_tracks to the template.
-    """
-    # Fetch top 10 songs ordered by popularity_trend_score (descending)
-    top_songs: List[Song] = Song.objects.order_by('-popularity_trend_score')[:10]
+logger = logging.getLogger(__name__)
 
-    # Prepare data for the template
-    initial_tracks: List[Dict] = [
-        {
-            'music_name': song.music_name,
-            'artist_name': song.artist_name or 'Unknown Artist',
-            'genre': song.genre or 'Unknown Genre',
-            'overlapping_emotions': song.overlapping_emotions or [],
-            'music_link': song.music_link if song.music_link else 'No link available',
-        }
-        for song in top_songs
-    ]
+# =========================================
+# 📂 LOAD DATASET
+# =========================================
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+DATASET_PATH = os.path.join(BASE_DIR, "recommendations", "data", "test.csv")
 
-    return render(request, 'home.html', {'initial_tracks': initial_tracks})
+try:
+    dataset = pd.read_csv(DATASET_PATH)
+    dataset.fillna("", inplace=True)
+    logger.info(f"Dataset loaded successfully with {len(dataset)} rows.")
+except Exception as e:
+    dataset = pd.DataFrame()
+    logger.error(f"Error loading dataset: {e}")
 
+# =========================================
+# 🔍 RECOMMENDATION API
+# =========================================
 def get_recommendations(request):
-    """
-    Return song recommendations as JSON based on a query parameter.
-    Default query is 'music for a peaceful meditative song'.
-    """
-    if request.method != "GET":
-        return JsonResponse({'error': 'Invalid request method'}, status=400)
+    query = request.GET.get("query", "").strip().lower()
 
-    query: str = request.GET.get('query', 'music for a peaceful meditative song').strip()
-    
+    # ✅ Case 1: No query or "popular" → return 10 songs across genres
+    if not query or query in ["popular", "default", ""]:
+        if dataset.empty:
+            return JsonResponse({"recommendations": []}, status=200)
+
+        songs_by_genre = []
+        grouped = dataset.groupby("genre")
+
+        # Pick 1 random from each genre (up to 10)
+        for genre, group in grouped:
+            if not group.empty:
+                songs_by_genre.append(group.sample(1).to_dict(orient="records")[0])
+            if len(songs_by_genre) >= 10:
+                break
+
+        # Fill remaining if needed
+        if len(songs_by_genre) < 10:
+            remaining = dataset.sample(10 - len(songs_by_genre)).to_dict(orient="records")
+            songs_by_genre.extend(remaining)
+
+        return JsonResponse({"recommendations": songs_by_genre}, safe=False)
+
+    # ✅ Case 2: Normal search
+    try:
+        results = search_songs(query)
+        return JsonResponse({"recommendations": results}, safe=False)
+    except Exception as e:
+        logger.exception(f"Recommendation error: {str(e)}")
+        return JsonResponse({"error": "Internal server error"}, status=500)
+
+# =========================================
+# 🎧 SEARCH API
+# =========================================
+@api_view(['GET'])
+def search_api(request):
+    query = request.GET.get('query', '').strip()
+
     if not query:
-        return JsonResponse({'error': 'Query cannot be empty'}, status=400)
+        # Return random 10 if no query
+        if not dataset.empty:
+            random_songs = dataset.sample(min(10, len(dataset))).to_dict(orient="records")
+            return Response({"results": random_songs})
+        return Response({"results": []})
 
     try:
-        recommendations: List[Dict] = recommend_songs(query)
+        results = search_songs(query, top_k=20)
+        return Response({"results": results})
     except Exception as e:
-        # Return clear error if something goes wrong in recommendation logic
-        return JsonResponse({'error': f'Failed to generate recommendations: {str(e)}'}, status=500)
+        logger.exception(f"Search error: {str(e)}")
+        return Response({"error": "Search failed"}, status=500)
 
-    return JsonResponse({'recommendations': recommendations})
+# =========================================
+# 🌐 PAGE VIEWS
+# =========================================
+def discover_view(request):
+    """Render the Discover page with default recommendations."""
+    if dataset.empty:
+        songs = []
+    else:
+        songs_by_genre = []
+        grouped = dataset.groupby("genre")
+
+        for genre, group in grouped:
+            if not group.empty:
+                songs_by_genre.append(group.sample(1).to_dict(orient="records")[0])
+            if len(songs_by_genre) >= 10:
+                break
+
+        if len(songs_by_genre) < 10:
+            extra = dataset.sample(10 - len(songs_by_genre)).to_dict(orient="records")
+            songs_by_genre.extend(extra)
+
+        songs = songs_by_genre
+
+    return render(request, 'discover.html', {"songs": songs})
 
 
+def genre_view(request):
+    return render(request, 'genre.html')
 
-class SignupView(TemplateView):
-    template_name = 'signup.html'
 
-    def post(self, request, *args, **kwargs):
-        username = request.POST.get('username')
-        email = request.POST.get('email')
-        password = request.POST.get('password')
-        password_confirm = request.POST.get('password_confirm')
+def top_charts_view(request):
+    return render(request, 'top_charts.html')
 
-        if password != password_confirm:
-            messages.error(request, "Passwords don't match.")
-            return render(request, 'signup.html')
-        # Here you'd normally create a user with Django auth
-        messages.success(request, f"Account created for {username}! (This is a demo.)")
-        return redirect('signup')  # Redirect back to signup page for now
-    
-class PlaylistView(TemplateView):
-    template_name = 'playlist.html'
 
-    def get(self, request, *args, **kwargs):
-        return render(request, 'playlist.html', {'messages': messages.get_messages(request)})
+def trending_view(request):
+    return render(request, 'trending.html')
+
+
+def favourites_view(request):
+    return render(request, 'favourites.html')
+
+
+def playlist_view(request):
+    return render(request, 'playlist.html')
+
+
+def signup_view(request):
+    return render(request, 'signup.html')

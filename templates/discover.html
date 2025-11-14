@@ -1,0 +1,190 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Discover – DuFy{% endblock %}
+
+{% block content %}
+
+<!-- ============================== HERO + SEARCH ============================== -->
+<section class="relative h-96 bg-gradient-to-b from-[#121212] to-[#1a1a1a] overflow-hidden">
+    <img 
+        src="https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4" 
+        alt="Music Banner" 
+        class="absolute inset-0 w-full h-full object-cover opacity-50"
+    />
+    <div class="absolute inset-0 bg-black bg-opacity-60"></div>
+
+    <div class="relative z-10 flex flex-col items-center justify-center h-full text-center px-6">
+        <h1 class="text-4xl md:text-5xl font-bold text-white mb-4">Discover Music</h1>
+        <p class="text-lg text-gray-300 mb-8">Search by mood, artist, or vibe</p>
+
+        <div class="w-full max-w-2xl">
+            <div class="relative">
+                <input
+                    id="searchInput"
+                    type="text"
+                    placeholder="e.g. Ed Sheeran, comedy, upbeat..."
+                    class="w-full py-4 pl-12 pr-16 bg-gray-900 bg-opacity-80 backdrop-blur-md 
+                           border border-green-500 rounded-full text-white placeholder-gray-400
+                           focus:outline-none focus:ring-2 focus:ring-green-400 text-lg"
+                    onkeydown="if(event.key === 'Enter') searchMusic()"
+                />
+                <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-green-400 text-xl"></i>
+                <button onclick="searchMusic()" 
+                        class="absolute right-3 top-1/2 transform -translate-y-1/2 bg-green-500 hover:bg-green-400 text-black font-bold py-2 px-5 rounded-full transition">
+                    Search
+                </button>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ============================== TOP PICKS ============================== -->
+<section class="py-12 px-6 bg-[#121212]">
+    <div class="max-w-7xl mx-auto">
+        <h2 class="text-3xl font-bold text-white mb-8">Top Picks</h2>
+        <div id="topPicks" class="flex gap-6 overflow-x-auto pb-4 scrollbar-thin scrollbar-thumb-green-500">
+            <p class="text-gray-400">Loading popular tracks...</p>
+        </div>
+    </div>
+</section>
+
+<!-- ============================== BEST MATCHES + EDITOR'S PICKS ============================== -->
+<section class="py-12 px-6 bg-[#0a0a0a]">
+    <div class="max-w-7xl mx-auto grid md:grid-cols-2 gap-10">
+        <!-- Best Matches -->
+        <div>
+            <h2 class="text-xl font-bold text-green-400 mb-4">Best Matches</h2>
+            <ul id="latestAlbum" class="space-y-3"></ul>
+        </div>
+
+        <!-- Editor's Picks -->
+        <div>
+            <h2 class="text-xl font-bold text-green-400 mb-4">Editor's Picks</h2>
+            <ul id="editorsPicks" class="space-y-3"></ul>
+        </div>
+    </div>
+</section>
+
+<!-- ============================== JS: SEARCH + RENDER ============================== -->
+<script>
+let allTracks = [];
+
+// Load initial default popular songs
+async function loadInitial() {
+    try {
+        const resp = await fetch('/api/recommend/?query=popular');
+        const data = await resp.json();
+        allTracks = data.recommendations || [];
+
+        if (!Array.isArray(allTracks) || allTracks.length === 0) {
+            document.getElementById("topPicks").innerHTML = `<p class="text-yellow-400">No default tracks found.</p>`;
+            return;
+        }
+
+        render(allTracks.slice(0, 5), "topPicks");
+        render(allTracks.slice(0, 4), "latestAlbum");
+        render(allTracks.slice(4, 8), "editorsPicks");
+    } catch (e) {
+        document.getElementById("topPicks").innerHTML = `<p class="text-red-400">API Error loading defaults.</p>`;
+        console.error("Error loading default tracks:", e);
+    }
+}
+
+
+
+
+// Search songs dynamically
+async function searchMusic() {
+    const query = document.getElementById("searchInput").value.trim();
+    if (!query) return;
+
+    const topPicks = document.getElementById("topPicks");
+    topPicks.innerHTML = `<p class="text-gray-400">Searching "${query}"...</p>`;
+
+    try {
+        const resp = await fetch(`/api/recommend/?query=${encodeURIComponent(query)}`);
+        // const data = await resp.json();
+        
+        const text = await resp.text();
+        const safeText = text.replace(/\bNaN\b/g, 'null');  // Replace NaN → null
+        const data = JSON.parse(safeText);
+
+        console.log("Search result for", query, data);
+
+        const results = Array.isArray(data.recommendations) ? data.recommendations : [];
+        allTracks = results;
+
+        if (results.length > 0) {
+            render(results.slice(0, 5), "topPicks");
+            render(results.slice(0, 4), "latestAlbum");
+            render(results.slice(4, 8), "editorsPicks");
+        } else {
+            topPicks.innerHTML = `<p class="text-yellow-400">No results found for "${query}". Try something like "lofi", "piano", or "rock".</p>`;
+            document.getElementById("latestAlbum").innerHTML = "";
+            document.getElementById("editorsPicks").innerHTML = "";
+        }
+    } catch (err) {
+        console.error("Search error for query:", query, err);
+        topPicks.innerHTML = `<p class="text-red-400">Error fetching results. Please try again.</p>`;
+    }
+}
+
+// RENDER FUNCTION
+function render(list, containerId) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    container.innerHTML = "";
+
+    if (!Array.isArray(list) || list.length === 0) {
+        container.innerHTML = `<p class="text-gray-400">No tracks available.</p>`;
+        return;
+    }
+
+    list.forEach(track => {
+        const img = track.image_url && track.image_url.trim() !== "" 
+            ? track.image_url 
+            : "https://placehold.co/300x300?text=Music";
+
+        const link = track.music_link || "#";
+        const name = track.music_name || "Unknown Track";
+        const artist = track.artist_name || "Unknown Artist";
+
+        if (containerId === "topPicks") {
+            container.innerHTML += `
+                <a href="${link}" target="_blank" 
+                   class="group flex-shrink-0 w-48 relative rounded-xl overflow-hidden shadow-xl hover:scale-105 transition">
+                    <img src="${img}" alt="${name}" class="w-full h-48 object-cover">
+                    <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition flex items-center justify-center">
+                        <i class="fas fa-play text-white text-4xl opacity-0 group-hover:opacity-100 transition"></i>
+                    </div>
+                    <div class="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black to-transparent">
+                        <p class="text-sm font-bold text-white truncate">${name}</p>
+                        <p class="text-xs text-gray-300 truncate">${artist}</p>
+                    </div>
+                </a>
+            `;
+        } else {
+            container.innerHTML += `
+                <li class="flex items-center justify-between bg-[#1e1e1e] p-3 rounded-lg hover:bg-[#2a2a2a] transition">
+                    <div class="flex items-center gap-3">
+                        <img src="${img}" alt="${name}" class="w-12 h-12 rounded object-cover">
+                        <div>
+                            <p class="font-medium text-white">${name}</p>
+                            <p class="text-sm text-gray-400">${artist}</p>
+                        </div>
+                    </div>
+                    <a href="${link}" target="_blank" 
+                       class="bg-green-500 hover:bg-green-400 text-black font-bold w-10 h-10 rounded-full flex items-center justify-center transition">
+                        <i class="fas fa-play text-sm"></i>
+                    </a>
+                </li>
+            `;
+        }
+    });
+}
+
+// Load defaults on start
+window.addEventListener("DOMContentLoaded", loadInitial);
+</script>
+{% endblock %}
