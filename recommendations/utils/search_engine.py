@@ -42,20 +42,20 @@ def load_resources():
         if missing_cols:
             raise ValueError(f"Dataset is missing columns: {missing_cols}")
 
-    if embeddings is None:
-        print("🎵 Loading embeddings...")
-        if not os.path.exists(EMB_PATH):
-            raise FileNotFoundError(f"Embedding file not found: {EMB_PATH}")
+    # if embeddings is None:
+    #     print("🎵 Loading embeddings...")
+    #     if not os.path.exists(EMB_PATH):
+    #         raise FileNotFoundError(f"Embedding file not found: {EMB_PATH}")
 
-        embeddings_loaded = torch.load(EMB_PATH, map_location="cpu")
-        # Convert numpy array to tensor if needed
-        if isinstance(embeddings_loaded, np.ndarray):
-            embeddings_loaded = torch.from_numpy(embeddings_loaded)
-        elif not isinstance(embeddings_loaded, torch.Tensor):
-            raise TypeError("Embeddings must be a torch.Tensor or numpy.ndarray")
+    #     embeddings_loaded = torch.load(EMB_PATH, map_location="cpu")
+    #     # Convert numpy array to tensor if needed
+    #     if isinstance(embeddings_loaded, np.ndarray):
+    #         embeddings_loaded = torch.from_numpy(embeddings_loaded)
+    #     elif not isinstance(embeddings_loaded, torch.Tensor):
+    #         raise TypeError("Embeddings must be a torch.Tensor or numpy.ndarray")
 
-        # Normalize for cosine similarity
-        embeddings = F.normalize(embeddings_loaded, dim=1)
+    #     # Normalize for cosine similarity
+    #     embeddings = F.normalize(embeddings_loaded, dim=1)
 
 
     # if model is None:
@@ -64,9 +64,15 @@ def load_resources():
     #     model = torch.quantize_dynamic(model, {torch.nn.Linear: torch.qint8}, dtype=torch.qint8) #Quantize model for ~4x smaller footprint with minimal accuracy loss
 
     if model is None:
-        print("Loading PRE-QUANTIZED model (~30 MB)...")
-        # This loads the tiny version you created above
-        model = SentenceTransformer("models/all-MiniLM-L6-v2-quantized")
+        print("Loading all-MiniLM-L6-v2 (normal)...")
+        model = SentenceTransformer("all-MiniLM-L6-v2")   # ← normal, no dtype
+
+    if embeddings is None:
+        print("Loading float16 embeddings...")
+        embeddings = torch.load(EMB_PATH, map_location="cpu")
+        embeddings = embeddings.to(torch.float16)        # ← force float16
+        embeddings = F.normalize(embeddings, dim=1)      # already normalized, but safe
+
 
     print(f"✅ Loaded {len(df)} songs and embeddings of shape {embeddings.shape}")
 
@@ -84,11 +90,25 @@ def search_songs(query: str, top_k: int = 10):
         return []
 
     # Encode query to vector
-    query_embedding = model.encode([query], convert_to_tensor=True)
-    query_embedding = F.normalize(query_embedding, dim=1)
+    # query_embedding = model.encode([query], convert_to_tensor=True)
+    # query_embedding = F.normalize(query_embedding, dim=1)
 
     # Compute cosine similarity
-    similarities = torch.matmul(embeddings, query_embedding.T).squeeze(1)
+    # similarities = torch.matmul(embeddings, query_embedding.T).squeeze(1)
+
+    # Query encoding
+    query_embedding = model.encode(
+        [query],
+        convert_to_tensor=True,
+        normalize_embeddings=True
+    )
+    query_embedding = query_embedding.to(torch.float16)   # ← convert query too
+
+    # Cosine similarity (safe with mixed precision)
+    similarities = torch.matmul(
+        embeddings.to(torch.float32),
+        query_embedding.to(torch.float32).T
+    ).squeeze(1)
 
     # Get top-k most similar
     top_k_indices = torch.topk(similarities, k=min(top_k, len(similarities))).indices
