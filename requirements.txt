@@ -8,3 +8,4 @@ torch
 scikit-learn
 faiss-cpu
 djangorestframework
+django-cors-headers
