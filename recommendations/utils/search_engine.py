@@ -5,7 +5,7 @@ import pandas as pd
 import numpy as np
 from sentence_transformers import SentenceTransformer
 import torch.nn.functional as F
-from sklearn.metrics.pairwise import cosine_similarity
+
 # ==============================
 # Paths
 # ==============================
@@ -14,43 +14,65 @@ DATA_PATH = os.path.join(BASE_DIR, "data", "test.csv")
 EMB_PATH = os.path.join(BASE_DIR, "data", "music_embeddings.pt")
 
 # ==============================
-# Load dataset and embeddings
+# Global variables (singletons)
 # ==============================
-print("🎵 Loading dataset and embeddings...")
+df = None
+embeddings = None
+model = None
 
-# Load dataset
-df = pd.read_csv(DATA_PATH)
-embeddings = torch.load(EMB_PATH, map_location="cpu")
-# Check for essential columns
-required_cols = {"music_name", "artist_name", "genre", "music_link"}
-missing_cols = required_cols - set(df.columns)
-if missing_cols:
-    raise ValueError(f"Dataset is missing columns: {missing_cols}")
+# ==============================
+# Load resources
+# ==============================
+def load_resources():
+    """
+    Load dataset, embeddings, and model once.
+    Reuse globally for all searches.
+    """
+    global df, embeddings, model
 
-# Load embeddings (Tensor)
-if not os.path.exists(EMB_PATH):
-    raise FileNotFoundError(f"❌ Embedding file not found: {EMB_PATH}")
+    if df is None:
+        print("🎵 Loading dataset...")
+        if not os.path.exists(DATA_PATH):
+            raise FileNotFoundError(f"Dataset file not found: {DATA_PATH}")
+        df = pd.read_csv(DATA_PATH)
 
-embeddings = torch.load(EMB_PATH)
-if isinstance(embeddings, np.ndarray):
-    embeddings = torch.from_numpy(embeddings)
-elif not isinstance(embeddings, torch.Tensor):
-    raise TypeError("Embeddings must be a torch.Tensor or numpy.ndarray")
+        # Ensure essential columns exist
+        required_cols = {"music_name", "artist_name", "genre", "music_link"}
+        missing_cols = required_cols - set(df.columns)
+        if missing_cols:
+            raise ValueError(f"Dataset is missing columns: {missing_cols}")
 
-embeddings = F.normalize(embeddings, dim=1)  # normalize for cosine similarity
+    if embeddings is None:
+        print("🎵 Loading embeddings...")
+        if not os.path.exists(EMB_PATH):
+            raise FileNotFoundError(f"Embedding file not found: {EMB_PATH}")
 
-# Load embedding model for queries
-model = SentenceTransformer("all-MiniLM-L6-v2")
+        embeddings_loaded = torch.load(EMB_PATH, map_location="cpu")
+        # Convert numpy array to tensor if needed
+        if isinstance(embeddings_loaded, np.ndarray):
+            embeddings_loaded = torch.from_numpy(embeddings_loaded)
+        elif not isinstance(embeddings_loaded, torch.Tensor):
+            raise TypeError("Embeddings must be a torch.Tensor or numpy.ndarray")
 
-print(f"✅ Loaded {len(df)} songs and embeddings of shape {embeddings.shape}")
+        # Normalize for cosine similarity
+        embeddings = F.normalize(embeddings_loaded, dim=1)
+
+    if model is None:
+        print("🎵 Loading embedding model for queries...")
+        model = SentenceTransformer("all-MiniLM-L6-v2")
+
+    print(f"✅ Loaded {len(df)} songs and embeddings of shape {embeddings.shape}")
 
 # ==============================
 # Search Function
 # ==============================
 def search_songs(query: str, top_k: int = 10):
     """
-    Search similar songs using cosine similarity between query and dataset embeddings
+    Search similar songs using cosine similarity between query and dataset embeddings.
+    Lazy-loads resources if not already loaded.
     """
+    load_resources()  # Ensures embeddings, df, and model are loaded
+
     if not query:
         return []
 
@@ -73,7 +95,21 @@ def search_songs(query: str, top_k: int = 10):
             "artist_name": row.get("artist_name", ""),
             "genre": row.get("genre", ""),
             "music_link": row.get("music_link", ""),
-            
         })
 
     return results
+
+# ==============================
+# Manual reload (optional)
+# ==============================
+def reload_embeddings():
+    """
+    Manually reload dataset and embeddings if they are updated.
+    """
+    global df, embeddings, model
+    print("🔄 Reloading dataset and embeddings...")
+    df = None
+    embeddings = None
+    model = None
+    load_resources()
+    print("✅ Reload complete!")
