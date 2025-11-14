@@ -7,3 +7,4 @@ pandas
 torch
 scikit-learn
 faiss-cpu
+djangorestframework
