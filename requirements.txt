@@ -9,3 +9,5 @@ scikit-learn
 faiss-cpu
 djangorestframework
 django-cors-headers
+sentence-transformers
+torch
