@@ -57,9 +57,16 @@ def load_resources():
         # Normalize for cosine similarity
         embeddings = F.normalize(embeddings_loaded, dim=1)
 
+
+    # if model is None:
+    #     print("🎵 Loading embedding model for queries...")
+    #     model = SentenceTransformer("all-MiniLM-L6-v2")
+    #     model = torch.quantize_dynamic(model, {torch.nn.Linear: torch.qint8}, dtype=torch.qint8) #Quantize model for ~4x smaller footprint with minimal accuracy loss
+
     if model is None:
-        print("🎵 Loading embedding model for queries...")
-        model = SentenceTransformer("all-MiniLM-L6-v2")
+        print("Loading PRE-QUANTIZED model (~30 MB)...")
+        # This loads the tiny version you created above
+        model = SentenceTransformer("models/all-MiniLM-L6-v2-quantized")
 
     print(f"✅ Loaded {len(df)} songs and embeddings of shape {embeddings.shape}")
 
