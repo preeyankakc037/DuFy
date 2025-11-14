@@ -10,4 +10,4 @@ faiss-cpu
 djangorestframework
 django-cors-headers
 sentence-transformers
-torch
+torch --index-url https://download.pytorch.org/whl/cpu
