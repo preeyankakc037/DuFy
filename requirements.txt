@@ -1,0 +1,9 @@
+Django==5.0
+gunicorn
+whitenoise
+pytz
+numpy
+pandas
+torch
+scikit-learn
+faiss-cpu
