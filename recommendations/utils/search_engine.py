@@ -3,6 +3,7 @@ import os
 import torch
 import pandas as pd
 import torch.nn.functional as F
+from sentence_transformers import SentenceTransformer
 
 # ==============================
 # Paths
@@ -12,88 +13,113 @@ DATA_PATH = os.path.join(BASE_DIR, "data", "test.csv")
 EMB_PATH = os.path.join(BASE_DIR, "data", "music_embeddings.pt")
 
 # ==============================
-# Global singletons
+# Global variables
 # ==============================
-_df = None
-_embeddings = None
-_model = None
+df = None
+embeddings = None
+model = None
 
 # ==============================
-# Lazy Load Resources
+# Load resources
 # ==============================
 def load_resources():
-    global _df, _embeddings, _model
+    """
+    Load dataset, embeddings, and model once.
+    Reuse globally for all searches.
+    """
+    global df, embeddings, model
 
-    if _df is None:
-        print("Loading dataset...")
+    # -------------------------
+    # Load dataset
+    # -------------------------
+    if df is None:
+        print("🎵 Loading dataset...")
         if not os.path.exists(DATA_PATH):
-            raise FileNotFoundError(f"Dataset not found: {DATA_PATH}")
-        _df = pd.read_csv(DATA_PATH)
-        required = {"music_name", "artist_name", "genre", "music_link"}
-        missing = required - set(_df.columns)
-        if missing:
-            raise ValueError(f"Missing columns: {missing}")
+            raise FileNotFoundError(f"Dataset file not found: {DATA_PATH}")
+        df = pd.read_csv(DATA_PATH)
 
-    if _model is None:
-        print("Loading SentenceTransformer (lazy)...")
-        # LAZY IMPORT — ONLY HERE!
-        from sentence_transformers import SentenceTransformer
-        _model = SentenceTransformer("all-MiniLM-L6-v2")
+        required_cols = {"music_name", "artist_name", "genre", "music_link"}
+        missing_cols = required_cols - set(df.columns)
+        if missing_cols:
+            raise ValueError(f"Dataset is missing columns: {missing_cols}")
 
-    if _embeddings is None:
-        print("Loading float16 embeddings...")
-        if not os.path.exists(EMB_PATH):
-            raise FileNotFoundError(f"Embeddings not found: {EMB_PATH}")
-        _embeddings = torch.load(EMB_PATH, map_location="cpu")
-        _embeddings = _embeddings.to(torch.float16)
-        _embeddings = F.normalize(_embeddings, dim=1)
+    # -------------------------
+    # Load embeddings
+    # -------------------------
+    if embeddings is None:
+        print("📦 Loading precomputed embeddings (float16)...")
+        loaded = torch.load(EMB_PATH, map_location="cpu")
+        if not isinstance(loaded, torch.Tensor):
+            loaded = torch.from_numpy(loaded)
+        embeddings = F.normalize(loaded.to(torch.float16), dim=1)
 
-    print(f"Loaded {_df.shape[0]} songs | Embeddings: {_embeddings.shape}")
+    # -------------------------
+    # Load model (quantized)
+    # -------------------------
+    if model is None:
+        print("🤖 Loading all-MiniLM-L6-v2 model with dynamic quantization...")
+        model = SentenceTransformer("all-MiniLM-L6-v2")
+        model = torch.quantization.quantize_dynamic(
+            model, {torch.nn.Linear}, dtype=torch.qint8
+        )
+
+    print(f"✅ Loaded {len(df)} songs and embeddings of shape {embeddings.shape}")
+
 
 # ==============================
-# Search Function
+# Search function
 # ==============================
 def search_songs(query: str, top_k: int = 10):
-    if not query.strip():
+    """
+    Search similar songs using cosine similarity between query and dataset embeddings.
+    Lazy-loads resources if not already loaded.
+    """
+    load_resources()
+
+    if not query:
         return []
 
-    load_resources()  # Ensures everything is loaded
-
-    # Encode query
-    query_emb = _model.encode(
+    # Encode query using full transformer (quantized)
+    query_embedding = model.encode(
         [query],
         convert_to_tensor=True,
         normalize_embeddings=True
-    ).to(torch.float16)
+    )
+    query_embedding = query_embedding.to(torch.float16)  # save memory
 
-    # Cosine similarity
-    sims = torch.matmul(
-        _embeddings.to(torch.float32),
-        query_emb.to(torch.float32).T
+    # Cosine similarity with embeddings on CPU
+    similarities = torch.matmul(
+        embeddings.to(torch.float32),
+        query_embedding.to(torch.float32).T
     ).squeeze(1)
 
-    # Top-K
-    top_k = min(top_k, len(sims))
-    indices = torch.topk(sims, k=top_k).indices.cpu().numpy()
+    # Get top-k results
+    top_idx = torch.topk(similarities, k=min(top_k, len(similarities))).indices.tolist()
 
     results = []
-    for idx in indices:
-        row = _df.iloc[idx]
+    for i in top_idx:
+        row = df.iloc[int(i)]
         results.append({
-            "music_name": str(row.get("music_name", "")),
-            "artist_name": str(row.get("artist_name", "")),
-            "genre": str(row.get("genre", "")),
-            "music_link": str(row.get("music_link", ""))
+            "music_name": row.get("music_name", ""),
+            "artist_name": row.get("artist_name", ""),
+            "genre": row.get("genre", ""),
+            "music_link": row.get("music_link", "")
         })
 
     return results
 
+
 # ==============================
-# Manual Reload
+# Manual reload (optional)
 # ==============================
 def reload_embeddings():
-    global _df, _embeddings, _model
-    print("Reloading resources...")
-    _df = _embeddings = _model = None
+    """
+    Manually reload dataset, embeddings, and model if they are updated.
+    """
+    global df, embeddings, model
+    print("🔄 Reloading dataset, embeddings, and model...")
+    df = None
+    embeddings = None
+    model = None
     load_resources()
-    print("Reload complete!")
+    print("✅ Reload complete!")

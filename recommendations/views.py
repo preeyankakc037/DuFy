@@ -1,4 +1,3 @@
-# recommendations/views.py
 import logging
 import os
 import random
@@ -7,11 +6,12 @@ from django.shortcuts import render
 from django.http import JsonResponse
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+from .utils.search_engine import search_songs
 
 logger = logging.getLogger(__name__)
 
 # =========================================
-# LOAD DATASET (STATIC, NO ML)
+# 📂 LOAD DATASET
 # =========================================
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATASET_PATH = os.path.join(BASE_DIR, "recommendations", "data", "test.csv")
@@ -19,84 +19,113 @@ DATASET_PATH = os.path.join(BASE_DIR, "recommendations", "data", "test.csv")
 try:
     dataset = pd.read_csv(DATASET_PATH)
     dataset.fillna("", inplace=True)
-    logger.info(f"Dataset loaded: {len(dataset)} songs")
+    logger.info(f"Dataset loaded successfully with {len(dataset)} rows.")
 except Exception as e:
     dataset = pd.DataFrame()
-    logger.error(f"Failed to load dataset: {e}")
+    logger.error(f"Error loading dataset: {e}")
 
 # =========================================
-# RECOMMENDATION API (LAZY SEARCH)
+# 🔍 RECOMMENDATION API
 # =========================================
 def get_recommendations(request):
     query = request.GET.get("query", "").strip().lower()
 
-    # No query → return diverse popular songs
+    # ✅ Case 1: No query or "popular" → return 10 songs across genres
     if not query or query in ["popular", "default", ""]:
         if dataset.empty:
-            return JsonResponse({"recommendations": []})
+            return JsonResponse({"recommendations": []}, status=200)
 
-        songs = []
-        for genre, group in dataset.groupby("genre"):
-            if not group.empty and len(songs) < 10:
-                songs.append(group.sample(1).to_dict("records")[0])
-            if len(songs) >= 10:
+        songs_by_genre = []
+        grouped = dataset.groupby("genre")
+
+        # Pick 1 random from each genre (up to 10)
+        for genre, group in grouped:
+            if not group.empty:
+                songs_by_genre.append(group.sample(1).to_dict(orient="records")[0])
+            if len(songs_by_genre) >= 10:
                 break
-        if len(songs) < 10:
-            songs.extend(dataset.sample(10 - len(songs)).to_dict("records"))
-        return JsonResponse({"recommendations": songs[:10]})
 
-    # Search with ML
+        # Fill remaining if needed
+        if len(songs_by_genre) < 10:
+            remaining = dataset.sample(10 - len(songs_by_genre)).to_dict(orient="records")
+            songs_by_genre.extend(remaining)
+
+        return JsonResponse({"recommendations": songs_by_genre}, safe=False)
+
+    # ✅ Case 2: Normal search
     try:
-        # LAZY IMPORT — ONLY WHEN NEEDED
-        from .utils.search_engine import search_songs
-        results = search_songs(query, top_k=10)
-        return JsonResponse({"recommendations": results})
+        results = search_songs(query)
+        return JsonResponse({"recommendations": results}, safe=False)
     except Exception as e:
-        logger.exception(f"Search failed: {e}")
-        return JsonResponse({"error": "Search unavailable"}, status=500)
+        logger.exception(f"Recommendation error: {str(e)}")
+        return JsonResponse({"error": "Internal server error"}, status=500)
 
 # =========================================
-# SEARCH API (DRF)
+# 🎧 SEARCH API
 # =========================================
 @api_view(['GET'])
 def search_api(request):
     query = request.GET.get('query', '').strip()
 
     if not query:
-        if dataset.empty:
-            return Response({"results": []})
-        return Response({
-            "results": dataset.sample(min(10, len(dataset))).to_dict("records")
-        })
+        # Return random 10 if no query
+        if not dataset.empty:
+            random_songs = dataset.sample(min(10, len(dataset))).to_dict(orient="records")
+            return Response({"results": random_songs})
+        return Response({"results": []})
 
     try:
-        from .utils.search_engine import search_songs  # LAZY
         results = search_songs(query, top_k=20)
         return Response({"results": results})
     except Exception as e:
-        logger.exception(f"Search API error: {e}")
+        logger.exception(f"Search error: {str(e)}")
         return Response({"error": "Search failed"}, status=500)
 
 # =========================================
-# PAGE VIEWS
+# 🌐 PAGE VIEWS
 # =========================================
 def discover_view(request):
+    """Render the Discover page with default recommendations."""
     if dataset.empty:
         songs = []
     else:
-        songs = []
-        for genre, group in dataset.groupby("genre"):
-            if len(songs) >= 10:
-                break
-            if not group.empty:
-                songs.append(group.sample(1).to_dict("records")[0])
-        if len(songs) < 10:
-            songs.extend(dataset.sample(10 - len(songs)).to_dict("records"))
-    return render(request, 'discover.html', {"songs": songs[:10]})
+        songs_by_genre = []
+        grouped = dataset.groupby("genre")
 
-def genre_view(request): return render(request, 'genre.html')
-def top_charts_view(request): return render(request, 'top_charts.html')
-def trending_view(request): return render(request, 'trending.html')
-def favourites_view(request): return render(request, 'favourites.html')
-def playlist_view(request): return render(request, 'playlist.html')
-def signup_view(request): return render(request, 'signup.html')
+        for genre, group in grouped:
+            if not group.empty:
+                songs_by_genre.append(group.sample(1).to_dict(orient="records")[0])
+            if len(songs_by_genre) >= 10:
+                break
+
+        if len(songs_by_genre) < 10:
+            extra = dataset.sample(10 - len(songs_by_genre)).to_dict(orient="records")
+            songs_by_genre.extend(extra)
+
+        songs = songs_by_genre
+
+    return render(request, 'discover.html', {"songs": songs})
+
+
+def genre_view(request):
+    return render(request, 'genre.html')
+
+
+def top_charts_view(request):
+    return render(request, 'top_charts.html')
+
+
+def trending_view(request):
+    return render(request, 'trending.html')
+
+
+def favourites_view(request):
+    return render(request, 'favourites.html')
+
+
+def playlist_view(request):
+    return render(request, 'playlist.html')
+
+
+def signup_view(request):
+    return render(request, 'signup.html')
